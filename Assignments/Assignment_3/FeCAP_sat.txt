@@ -1,0 +1,59 @@
+// VerilogA for MyFirstWorkspace_lib, FeCAP, veriloga
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+module FeCAP(Va,Vb,Q,C);
+    
+      inout Va,Vb,Q,C;
+	electrical Va,Vb,Vaux,Vd,Q,C;
+	
+
+    parameter real tv 	  = 1.5e-6; // time constant
+    
+    
+    parameter real Ps 	  = 20e-6;	// saturation polarization
+    parameter real Pr 	  = 18e-6; // remnant polarization
+    parameter real Vc 	  = 0.8; //  coercive voltage
+    parameter real tfe 	  = 10e-7;	// ferroelectric thickness
+    parameter real e_fe	   = 40;		
+    parameter real e0 	  = 8.854e-14; 	
+    
+	
+    real Vfe , d_Vfe,qfe,Cfe;
+	
+analog function real Qfe;
+
+       input vfe, d_V,Ps, Pr, Vc, tfe;
+       real vfe,Ps, Pr, Vc, tfe, dir, s, d_V,e_fe,e0;    
+    
+      begin 
+//   Calculate the parameter s used in Preisach model. Note that it should depend on the direction of polarization. Calculate Qfe.
+          
+          e_fe 	  = 40;			
+          e0 	  = 8.854e-14;		
+
+         
+
+     end 
+endfunction
+	
+	analog begin
+         
+         V(Va,Vaux) <+ I(Va,Veff) ;
+         I(Vaux,Vb ) <+ tv* ddt(V(Veff,Vb));
+         
+         
+	//define Vfe and d_Vfe. Assign qfe and calculate Cfe. 
+                  
+         
+                    	    
+	    
+	    V(C) <+ Cfe;
+          
+          V(Q) <+ qfe ;
+
+	    
+	    
+     end
+endmodule
