@@ -1,0 +1,89 @@
+
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+module RRAM();
+	
+	inout ;
+	electrical ;
+// Constants
+	parameter real k      = 1.38e-23;   // Boltzmann Constant in J/K
+	parameter real q      = 1.602e-19;  // Charge of electron in Coloumb
+// Tunneling current related parameters		
+	parameter real g0     = 0.8e-9;    // fitting parameter in meters
+	parameter real V0     = 0.2;       // fitting parameter in volts 
+	parameter real I0     = 0.65e-4;   // fitting parameter in amperes
+// Gap variation related parameters	
+	parameter real ve0    = 10e6;        // Escape Velocity
+	parameter real Eam    = 1.29;        // Activation Energy for vacancy generation in eV
+	parameter real a      = 0.8e-10;   // hopping site distance in meters
+	parameter real gamma0 = 30;       // fitting parameter for gamma
+	parameter real b      = 10.0;        // fitting parameter for gamma
+	parameter real c      = 1.0;        // fitting parameter for gamma
+	parameter real L      = 10e-9;       // Thickness of oxide
+    parameter real gmax   = 3.3e-9;       // Maximum gap length
+	parameter real gmin   = ?;      // Minimum gap length  
+	parameter real gini   = ?;       // initial gap distance
+// CF radius	
+	parameter real r_cf   = 4e-9;       //  CF radius
+	parameter real rho    = 1e-3;      //  CF resistivity, in ohm-meter
+	 
+// Thermal circuits
+    parameter real Rth    = 3e6;       // Effective thermal conductance in J/K/s
+	parameter real Tamb   = 300.0;      // T   
+// CC limit
+	parameter real CC 	  = ?;		// Compliance Current
+
+	real temp,gap,gamma,Ig,R,area;
+	
+
+analog begin
+    area = ?;
+// Updating Temperature
+	temp = ?;	
+
+// local electric field enhancement factor factor calculation
+	gamma = gamma0 - b * pow(((gini + V(Gap))/2e-9), c);
+//constraints	
+	if (gini + V(Gap) < gmin && V(TE,BE) > 0) begin
+		gamma = 0;
+	end
+	
+	if (gini + V(Gap) > gmax && V(TE,BE) < 0) begin
+		gamma = 0;
+	end
+		
+// Gap dynamics	
+	I(Gap) <+ ?;
+	I(Gap) <+ ?;
+	gap    = gini + ?;
+	
+	if(gap<gmin) begin
+		gap = ?;
+	end	
+	if ( gap>gmax) begin
+		gap=?;
+	end	
+	
+// Stanford Current Model
+	Ig =  I0*exp(-gap/g0)*sinh(V(TE,BE)/V0);
+
+//CC limit		
+	if(Ig >= CC) begin
+		Ig = CC;
+	end
+// Model defination    
+	R        =  ?; 
+    I(TE,n1) <+ ?;   
+	I(n1,BE) <+ Ig;
+	
+// Temperature Dynamics
+	I(Temp) <+ -V(TE,BE)*(Ig);
+	I(Temp) <+ ?;	
+// Monitoring gap and temperature for plotting 
+	I(G) 	<+ gap;
+	I(T) 	<+ temp;
+
+end
+endmodule
